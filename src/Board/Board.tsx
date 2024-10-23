@@ -12,6 +12,7 @@ const Board = () => {
   const [isGameFinished, setIsGameFinished] = useState(false);
   const [gameMessage, setGameMessage] = useState('Player X starts');
   const [combo, setCombo] = useState<number[]>([]);
+  const [playAgainst, setPlayAgainst] = useState('2nd player');
 
   const [winningCombos, setWinningCombos] = useState<number[][]>([]);
 
@@ -65,23 +66,61 @@ const Board = () => {
     setGameMessage(`Player ${currentPlayer} starts`);
   };
 
+  const selectOpponent = (e: any) => {
+    setPlayAgainst(e.target.value);
+  };
+
   const boxClickHandler = (event: any) => {
     if (isGameFinished) {
       return;
     }
     setGameMessage('');
-    const boxIndex = +event.target.getAttribute('box-index');
+    if (playAgainst === '2nd player') {
+      const boxIndex = +event.target.getAttribute('box-index');
 
-    const currentBoxValue = game[boxIndex];
-    if (currentBoxValue) {
-      return;
+      const currentBoxValue = game[boxIndex];
+      if (currentBoxValue) {
+        return;
+      }
+
+      const newGameValue = [...game];
+      newGameValue[boxIndex] = currentPlayer;
+
+      setGame(newGameValue);
+      setCurrentPlayer(currentPlayer === 'X' ? 'O' : 'X');
     }
+    if (playAgainst === 'CPU') {
+      if (currentPlayer === 'X') {
+        const boxIndex = +event.target.getAttribute('box-index');
 
-    const newGameValue = [...game];
-    newGameValue[boxIndex] = currentPlayer;
+        const currentBoxValue = game[boxIndex];
+        if (currentBoxValue) {
+          return;
+        }
 
-    setGame(newGameValue);
-    setCurrentPlayer(currentPlayer === 'X' ? 'O' : 'X');
+        const newGameValue = [...game];
+        newGameValue[boxIndex] = currentPlayer;
+
+        setGame(newGameValue);
+        setCurrentPlayer('O');
+      }
+      if (currentPlayer === 'O') {
+        setTimeout(() => {
+          const availableMoves = game
+            .map((value, index) => (value === '' ? index : ''))
+            .filter((index) => index !== '');
+
+          const randomMove =
+            availableMoves[Math.floor(Math.random() * availableMoves.length)];
+
+          const newGameValue = [...game];
+          newGameValue[randomMove] = currentPlayer;
+
+          setGame(newGameValue);
+          setCurrentPlayer('X');
+        }, 1000);
+      }
+    }
   };
 
   const checkIfWin = () => {
@@ -122,6 +161,12 @@ const Board = () => {
   }, [game]);
 
   useEffect(() => {
+    if (currentPlayer === 'O' && playAgainst === 'CPU') {
+      boxClickHandler('');
+    }
+  }, [currentPlayer]);
+
+  useEffect(() => {
     if (!game.includes('') && combo.length === 0) {
       setGameMessage("It's a draw");
     }
@@ -149,6 +194,25 @@ const Board = () => {
             <option value={4}>4</option>
             <option value={5}>5</option>
           </select>
+        </div>
+        <div>
+          <span>Select your opponent</span>
+          <div className="select_opponent" onChange={selectOpponent}>
+            <input
+              checked={playAgainst === 'CPU'}
+              type="radio"
+              value="CPU"
+              name="opponent"
+            />
+            CPU
+            <input
+              checked={playAgainst === '2nd player'}
+              type="radio"
+              value="2nd player"
+              name="opponent"
+            />
+            2nd player
+          </div>
         </div>
       </div>
       <div
