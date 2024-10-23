@@ -10,6 +10,7 @@ const Board = () => {
   const [scorePlayerO, setScorePlayerO] = useState(0);
   const [isGameFinished, setIsGameFinished] = useState(false);
   const [gameMessage, setGameMessage] = useState('Player X starts');
+  const [combo, setCombo] = useState('');
 
   const winningCombo = ['012', '345', '678', '036', '147', '258', '048', '246'];
 
@@ -18,12 +19,14 @@ const Board = () => {
     setScorePlayerO(0);
     setScorePlayerX(0);
     setIsGameFinished(false);
+    setCombo('');
     setGameMessage(`Player ${currentPlayer} starts`);
   };
 
   const restartGame = () => {
     setGame(['', '', '', '', '', '', '', '', '']);
     setIsGameFinished(false);
+    setCombo('');
     setGameMessage(`Player ${currentPlayer} starts`);
   };
 
@@ -56,6 +59,7 @@ const Board = () => {
         setScorePlayerX((prevState) => prevState + 1);
         setGameMessage('Player X won');
         setIsGameFinished(true);
+        setCombo(winningCombo[i]);
       } else if (
         game[+winningCombo[i][0]] === 'O' &&
         game[+winningCombo[i][1]] === 'O' &&
@@ -64,6 +68,7 @@ const Board = () => {
         setScorePlayerO((prevState) => prevState + 1);
         setGameMessage('Player O won');
         setIsGameFinished(true);
+        setCombo(winningCombo[i]);
       } else if (!game.includes('')) {
         setIsGameFinished(true);
       }
@@ -89,7 +94,10 @@ const Board = () => {
   return (
     <div className="game_container">
       <div className="scores">
-        <h1>Score</h1>
+        {(scorePlayerO !== 0 || scorePlayerX !== 0) && (
+          <button onClick={resetGame}>Reset scores</button>
+        )}
+        <h1>Scores</h1>
         <span>
           Player X : <strong>{scorePlayerX}</strong>
         </span>
@@ -101,12 +109,15 @@ const Board = () => {
       <div className="board">
         {game.map((item, index) => {
           return (
-            <Box {...{ index, item }} key={index} onClick={boxClickHandler} />
+            <Box
+              {...{ index, item, combo }}
+              key={index}
+              onClick={boxClickHandler}
+            />
           );
         })}
       </div>
       <button onClick={restartGame}>Restart game</button>
-      <button onClick={resetGame}>Reset scores</button>
     </div>
   );
 };
