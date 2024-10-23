@@ -81,14 +81,10 @@ const Board = () => {
   }, [game]);
 
   useEffect(() => {
-    if (
-      !game.includes('') &&
-      gameMessage !== 'Player O won' &&
-      gameMessage !== 'Player X won'
-    ) {
+    if (!game.includes('') && combo === '') {
       setGameMessage("It's a draw");
     }
-  }, [game]);
+  }, [combo]);
   /* eslint-enable */
 
   return (
