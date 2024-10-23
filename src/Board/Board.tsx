@@ -4,29 +4,64 @@ import Box from '../Box/Box.tsx';
 import './Board.css';
 
 const Board = () => {
+  const [grid, setGrid] = useState(3);
   const [game, setGame] = useState(['', '', '', '', '', '', '', '', '']);
   const [currentPlayer, setCurrentPlayer] = useState('X');
   const [scorePlayerX, setScorePlayerX] = useState(0);
   const [scorePlayerO, setScorePlayerO] = useState(0);
   const [isGameFinished, setIsGameFinished] = useState(false);
   const [gameMessage, setGameMessage] = useState('Player X starts');
-  const [combo, setCombo] = useState('');
+  const [combo, setCombo] = useState<number[]>([]);
 
-  const winningCombo = ['012', '345', '678', '036', '147', '258', '048', '246'];
+  const [winningCombos, setWinningCombos] = useState<number[][]>([]);
+
+  const makeBoard = () => {
+    const arr = new Array(grid * grid).fill('');
+    setGame(arr);
+  };
+
+  const generateWinningCombos = () => {
+    const gridSize = grid;
+    const combos: number[][] = [];
+
+    for (let i = 0; i < gridSize; i++) {
+      const row = Array.from({ length: gridSize }, (_, j) => i * gridSize + j);
+      combos.push(row);
+    }
+
+    for (let i = 0; i < gridSize; i++) {
+      const col = Array.from({ length: gridSize }, (_, j) => j * gridSize + i);
+      combos.push(col);
+    }
+
+    const diag1 = Array.from(
+      { length: gridSize },
+      (_, i) => i * (gridSize + 1)
+    );
+    combos.push(diag1);
+
+    const diag2 = Array.from(
+      { length: gridSize },
+      (_, i) => (i + 1) * (gridSize - 1)
+    );
+    combos.push(diag2);
+
+    setWinningCombos(combos);
+  };
 
   const resetGame = () => {
-    setGame(['', '', '', '', '', '', '', '', '']);
+    makeBoard();
     setScorePlayerO(0);
     setScorePlayerX(0);
     setIsGameFinished(false);
-    setCombo('');
+    setCombo([]);
     setGameMessage(`Player ${currentPlayer} starts`);
   };
 
   const restartGame = () => {
-    setGame(['', '', '', '', '', '', '', '', '']);
+    makeBoard();
     setIsGameFinished(false);
-    setCombo('');
+    setCombo([]);
     setGameMessage(`Player ${currentPlayer} starts`);
   };
 
@@ -50,38 +85,44 @@ const Board = () => {
   };
 
   const checkIfWin = () => {
-    for (let i = 0; i < winningCombo.length; i++) {
-      if (
-        game[+winningCombo[i][0]] === 'X' &&
-        game[+winningCombo[i][1]] === 'X' &&
-        game[+winningCombo[i][2]] === 'X'
-      ) {
+    for (let i = 0; i < winningCombos.length; i++) {
+      const combo = winningCombos[i];
+
+      if (combo.every((index: number) => game[index] === 'X')) {
         setScorePlayerX((prevState) => prevState + 1);
         setGameMessage('Player X won');
         setIsGameFinished(true);
-        setCombo(winningCombo[i]);
-      } else if (
-        game[+winningCombo[i][0]] === 'O' &&
-        game[+winningCombo[i][1]] === 'O' &&
-        game[+winningCombo[i][2]] === 'O'
-      ) {
+        setCombo(combo);
+      } else if (combo.every((index: number) => game[index] === 'O')) {
         setScorePlayerO((prevState) => prevState + 1);
         setGameMessage('Player O won');
         setIsGameFinished(true);
-        setCombo(winningCombo[i]);
-      } else if (!game.includes('')) {
-        setIsGameFinished(true);
+        setCombo(combo);
       }
+    }
+
+    if (!game.includes('')) {
+      setIsGameFinished(true);
+      setGameMessage("It's a draw");
     }
   };
 
+  const selectGridSize = (e: any) => {
+    setGrid(+e.target.value);
+  };
+
   /* eslint-disable */
+  useEffect(() => {
+    makeBoard();
+    generateWinningCombos();
+  }, [grid]);
+
   useEffect(() => {
     checkIfWin();
   }, [game]);
 
   useEffect(() => {
-    if (!game.includes('') && combo === '') {
+    if (!game.includes('') && combo.length === 0) {
       setGameMessage("It's a draw");
     }
   }, [combo]);
@@ -101,12 +142,23 @@ const Board = () => {
           Player O : <strong>{scorePlayerO}</strong>
         </span>
         <h2>{gameMessage}</h2>
+        <div className="grid_size_container">
+          <span>Choose the grid size</span>
+          <select value={grid} onChange={selectGridSize}>
+            <option value={3}>3</option>
+            <option value={4}>4</option>
+            <option value={5}>5</option>
+          </select>
+        </div>
       </div>
-      <div className="board">
+      <div
+        style={{ height: `${grid * 40}px`, width: `${grid * 40}px` }}
+        className="board"
+      >
         {game.map((item, index) => {
           return (
             <Box
-              {...{ index, item, combo }}
+              {...{ index, item, combo, grid }}
               key={index}
               onClick={boxClickHandler}
             />
