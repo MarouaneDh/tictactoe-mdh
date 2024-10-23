@@ -70,6 +70,7 @@ const Board = () => {
     }
   };
 
+  /* eslint-disable */
   useEffect(() => {
     checkIfWin();
   }, [game]);
@@ -83,6 +84,7 @@ const Board = () => {
       setGameMessage("It's a draw");
     }
   }, [game]);
+  /* eslint-enable */
 
   return (
     <div className="game_container">
