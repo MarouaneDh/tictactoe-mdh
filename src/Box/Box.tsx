@@ -2,15 +2,25 @@ import React from 'react';
 
 import './Box.css';
 
-type Props = {
+type BoxProps = {
   item: string;
   index: number;
   combo: number[];
   grid: number;
+  currentPlayer: string;
+  playAgainst: string;
   onClick(event: any): void;
 };
 
-const Box = ({ item, index, combo, grid, onClick }: Props) => {
+const Box = ({
+  item,
+  index,
+  combo,
+  grid,
+  currentPlayer,
+  playAgainst,
+  onClick,
+}: BoxProps) => {
   const crossStyle = () => {
     if (combo.length < 2) return '';
 
@@ -25,7 +35,15 @@ const Box = ({ item, index, combo, grid, onClick }: Props) => {
   };
 
   return (
-    <div onClick={onClick} box-index={index} className="box">
+    <div
+      style={{
+        pointerEvents:
+          playAgainst === 'CPU' && currentPlayer === 'O' ? 'none' : 'auto',
+      }}
+      onClick={onClick}
+      box-index={index}
+      className="box"
+    >
       <span
         className={combo.includes(index) ? 'winMark-' + crossStyle() : 'mark'}
       >

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import Box from '../Box/Box.tsx';
 import './Board.css';
+import ScoreSection from '../ScoreSection/ScoreSection.tsx';
 
 const Board = () => {
   const [grid, setGrid] = useState(3);
@@ -13,6 +14,7 @@ const Board = () => {
   const [gameMessage, setGameMessage] = useState('Player X starts');
   const [combo, setCombo] = useState<number[]>([]);
   const [playAgainst, setPlayAgainst] = useState('2nd player');
+  const [xPlayed, setXPlayed] = useState(false);
 
   const [winningCombos, setWinningCombos] = useState<number[][]>([]);
 
@@ -56,18 +58,22 @@ const Board = () => {
     setScorePlayerX(0);
     setIsGameFinished(false);
     setCombo([]);
-    setGameMessage(`Player ${currentPlayer} starts`);
+    setCurrentPlayer('X');
+    setXPlayed(false);
+    setGameMessage(`Player X starts`);
   };
 
   const restartGame = () => {
     makeBoard();
     setIsGameFinished(false);
     setCombo([]);
-    setGameMessage(`Player ${currentPlayer} starts`);
-  };
-
-  const selectOpponent = (e: any) => {
-    setPlayAgainst(e.target.value);
+    if (playAgainst === 'CPU') {
+      setGameMessage(`Player X starts`);
+      setCurrentPlayer('X');
+      setXPlayed(false);
+    } else {
+      setGameMessage(`Player ${currentPlayer} starts`);
+    }
   };
 
   const boxClickHandler = (event: any) => {
@@ -101,8 +107,8 @@ const Board = () => {
         const newGameValue = [...game];
         newGameValue[boxIndex] = currentPlayer;
 
+        setXPlayed(true);
         setGame(newGameValue);
-        setCurrentPlayer('O');
       }
       if (currentPlayer === 'O') {
         setTimeout(() => {
@@ -118,6 +124,7 @@ const Board = () => {
 
           setGame(newGameValue);
           setCurrentPlayer('X');
+          setXPlayed(false);
         }, 1000);
       }
     }
@@ -146,10 +153,6 @@ const Board = () => {
     }
   };
 
-  const selectGridSize = (e: any) => {
-    setGrid(+e.target.value);
-  };
-
   /* eslint-disable */
   useEffect(() => {
     makeBoard();
@@ -167,6 +170,17 @@ const Board = () => {
   }, [currentPlayer]);
 
   useEffect(() => {
+    if (
+      currentPlayer === 'X' &&
+      playAgainst === 'CPU' &&
+      combo.length === 0 &&
+      xPlayed
+    ) {
+      setCurrentPlayer('O');
+    }
+  }, [xPlayed]);
+
+  useEffect(() => {
     if (!game.includes('') && combo.length === 0) {
       setGameMessage("It's a draw");
     }
@@ -175,46 +189,18 @@ const Board = () => {
 
   return (
     <div className="game_container">
-      <div className="scores">
-        {(scorePlayerO !== 0 || scorePlayerX !== 0) && (
-          <button onClick={resetGame}>Reset scores</button>
-        )}
-        <h1>Scores</h1>
-        <span>
-          Player X : <strong>{scorePlayerX}</strong>
-        </span>
-        <span>
-          Player O : <strong>{scorePlayerO}</strong>
-        </span>
-        <h2>{gameMessage}</h2>
-        <div className="grid_size_container">
-          <span>Choose the grid size</span>
-          <select value={grid} onChange={selectGridSize}>
-            <option value={3}>3</option>
-            <option value={4}>4</option>
-            <option value={5}>5</option>
-          </select>
-        </div>
-        <div>
-          <span>Select your opponent</span>
-          <div className="select_opponent" onChange={selectOpponent}>
-            <input
-              checked={playAgainst === 'CPU'}
-              type="radio"
-              value="CPU"
-              name="opponent"
-            />
-            CPU
-            <input
-              checked={playAgainst === '2nd player'}
-              type="radio"
-              value="2nd player"
-              name="opponent"
-            />
-            2nd player
-          </div>
-        </div>
-      </div>
+      <ScoreSection
+        {...{
+          scorePlayerO,
+          scorePlayerX,
+          resetGame,
+          grid,
+          gameMessage,
+          setGrid,
+          playAgainst,
+          setPlayAgainst,
+        }}
+      />
       <div
         style={{ height: `${grid * 40}px`, width: `${grid * 40}px` }}
         className="board"
@@ -222,7 +208,7 @@ const Board = () => {
         {game.map((item, index) => {
           return (
             <Box
-              {...{ index, item, combo, grid }}
+              {...{ index, item, combo, grid, currentPlayer, playAgainst }}
               key={index}
               onClick={boxClickHandler}
             />
