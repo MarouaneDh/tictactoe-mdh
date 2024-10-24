@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 
 import Box from '../Box/Box.tsx';
-import './Board.css';
 import ScoreSection from '../ScoreSection/ScoreSection.tsx';
+
+import './Board.css';
 
 const Board = () => {
   const [grid, setGrid] = useState(3);

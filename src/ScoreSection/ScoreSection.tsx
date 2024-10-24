@@ -1,12 +1,14 @@
 import React from 'react';
 
+import './ScoreSection.css';
+
 type ScoreSectionProps = {
   scorePlayerO: number;
   scorePlayerX: number;
-  resetGame(): void;
   gameMessage: string;
   grid: number;
   playAgainst: string;
+  resetGame(): void;
   setGrid(grid: number): void;
   setPlayAgainst(opponent: string): void;
 };
@@ -14,10 +16,10 @@ type ScoreSectionProps = {
 const ScoreSection = ({
   scorePlayerO,
   scorePlayerX,
-  resetGame,
   gameMessage,
   grid,
   playAgainst,
+  resetGame,
   setGrid,
   setPlayAgainst,
 }: ScoreSectionProps) => {
@@ -30,6 +32,7 @@ const ScoreSection = ({
     setPlayAgainst(opponent);
     resetGame();
   };
+
   return (
     <div className="scores">
       {(scorePlayerO !== 0 || scorePlayerX !== 0) && (
